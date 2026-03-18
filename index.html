@@ -5,9 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anästhesie & Schockraum</title>
 <style>
-body {font-family: Arial; background:#111; color:#fff; text-align:center; padding:20px;}
-button {padding:15px; margin:10px; width:90%; font-size:16px;}
-.hidden {display:none;}
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+h1 {
+  margin-bottom: 8px;
+}
+p {
+  line-height: 1.4;
+}
+button {
+  padding: 15px;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 1100px;
+  font-size: 18px;
+  display: block;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.answer-btn {
+  background: #fff;
+  color: #111;
+}
+.answer-btn.correct {
+  background: #1f9d55;
+  color: #fff;
+}
+.answer-btn.wrong {
+  background: #c53030;
+  color: #fff;
+}
+.answer-btn.disabled {
+  opacity: 0.9;
+  cursor: default;
+}
+#feedback {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+#explanation {
+  margin-top: 10px;
+  font-size: 17px;
+  color: #ddd;
+}
+#nextBtn {
+  background: #2563eb;
+  color: white;
+  margin-top: 20px;
+}
+.hidden {
+  display: none;
+}
+#timer {
+  margin-top: 18px;
+  font-size: 22px;
+  font-weight: bold;
+}
+#result {
+  margin-top: 30px;
+  font-size: 22px;
+}
 </style>
 </head>
 <body>
@@ -15,103 +79,164 @@ button {padding:15px; margin:10px; width:90%; font-size:16px;}
 <h1>Anästhesie & Schockraum</h1>
 <p>Exkurs: internistischer Schockraum</p>
 
-<div id="start">
-<button onclick="start()">Start</button>
+<div id="quizBox">
+  <p id="frage" style="font-size:24px;font-weight:bold;"></p>
+  <div id="antworten"></div>
+  <div id="feedback"></div>
+  <div id="explanation"></div>
+  <button id="nextBtn" class="hidden" onclick="nextQuestion()">Nächste Frage</button>
+  <div id="timer"></div>
 </div>
 
-<div id="quiz" class="hidden">
-<p id="frage"></p>
-<div id="antworten"></div>
-<p id="timer"></p>
-</div>
+<div id="result" class="hidden"></div>
 
 <script>
 let fragen = [
-{
-frage: "Warum ist der Atemweg bei bewusstlosen Patienten gefährdet?",
-antworten: [
-"Die Zunge fällt zurück",
-"Kein Gasaustausch findet statt",
-"Jeder muss intubiert werden",
-"Nur EKG zeigt Sicherheit"
-],
-richtig: 0
-},
-{
-frage: "Welche Maßnahme sollte bei RSI vermieden werden?",
-antworten: [
-"Präoxygenierung",
-"Zwischenbeatmung",
-"Teamkommunikation",
-"Laryngoskopie"
-],
-richtig: 1
-},
-{
-frage: "Was verbessert die Gerinnung im Schockraum?",
-antworten: [
-"Auskühlen lassen",
-"Wärmeerhalt",
-"Volumen ohne Kontrolle",
-"Selen hochdosiert"
-],
-richtig: 1
-}
+  {
+    frage: "Welche Maßnahme sollte bei RSI vermieden werden?",
+    antworten: ["Präoxygenierung", "Zwischenbeatmung", "Teamkommunikation", "Laryngoskopie"],
+    richtig: 1,
+    erklaerung: "Bei der klassischen RSI soll auf Zwischenbeatmung verzichtet werden."
+  },
+  {
+    frage: "Warum ist der Atemweg bei bewusstlosen Patienten gefährdet?",
+    antworten: ["Die Zunge fällt zurück", "Kein Gasaustausch", "Jeder muss intubiert werden", "Nur EKG zeigt Sicherheit"],
+    richtig: 0,
+    erklaerung: "Durch das Zurückfallen der Zunge kann der Atemweg verlegt werden."
+  },
+  {
+    frage: "Welche Maßnahme verbessert die Gerinnung im Schockraum?",
+    antworten: ["Auskühlen lassen", "Wärmeerhalt", "Volumen ohne Kontrolle", "Selen hochdosiert"],
+    richtig: 1,
+    erklaerung: "Wärmeerhalt ist wichtig, weil Hypothermie die Gerinnung verschlechtert."
+  }
 ];
 
+let aktuelleFragen = [...fragen];
+let falschBeantwortet = [];
 let index = 0;
-let falsch = [];
-let zeit;
+let punktzahl = 0;
+let timer;
+let zeit = 120;
+let beantwortet = false;
 
-function start(){
-document.getElementById("start").classList.add("hidden");
-document.getElementById("quiz").classList.remove("hidden");
+function zeigeFrage() {
+  if (index >= aktuelleFragen.length) {
+    if (falschBeantwortet.length > 0) {
+      aktuelleFragen = [...falschBeantwortet];
+      falschBeantwortet = [];
+      index = 0;
+      alert("Jetzt kommen die falsch beantworteten Fragen erneut.");
+    } else {
+      quizBeenden();
+      return;
+    }
+  }
+
+  beantwortet = false;
+  zeit = 120;
+  clearInterval(timer);
+
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("explanation").innerText = "";
+  document.getElementById("nextBtn").classList.add("hidden");
+
+  let frageObj = aktuelleFragen[index];
+  document.getElementById("frage").innerText = frageObj.frage;
+
+  let antwortenBox = document.getElementById("antworten");
+  antwortenBox.innerHTML = "";
+
+  frageObj.antworten.forEach((antwort, i) => {
+    let btn = document.createElement("button");
+    btn.innerText = antwort;
+    btn.className = "answer-btn";
+    btn.onclick = () => pruefeAntwort(i);
+    antwortenBox.appendChild(btn);
+  });
+
+  document.getElementById("timer").innerText = "Zeit: 120";
+
+  timer = setInterval(() => {
+    zeit--;
+    document.getElementById("timer").innerText = "Zeit: " + zeit;
+    if (zeit <= 0) {
+      clearInterval(timer);
+      zeitAbgelaufen();
+    }
+  }, 1000);
+}
+
+function pruefeAntwort(auswahl) {
+  if (beantwortet) return;
+  beantwortet = true;
+  clearInterval(timer);
+
+  let frageObj = aktuelleFragen[index];
+  let buttons = document.querySelectorAll(".answer-btn");
+
+  buttons.forEach((btn, i) => {
+    btn.classList.add("disabled");
+    if (i === frageObj.richtig) {
+      btn.classList.add("correct");
+    }
+  });
+
+  if (auswahl === frageObj.richtig) {
+    document.getElementById("feedback").innerText = "Richtig";
+    punktzahl++;
+  } else {
+    buttons[auswahl].classList.add("wrong");
+    document.getElementById("feedback").innerText = "Falsch";
+    falschBeantwortet.push(frageObj);
+  }
+
+  document.getElementById("explanation").innerText =
+    "Richtige Antwort: " + frageObj.antworten[frageObj.richtig] +
+    ". " + (frageObj.erklaerung || "");
+
+  document.getElementById("nextBtn").classList.remove("hidden");
+}
+
+function zeitAbgelaufen() {
+  if (beantwortet) return;
+  beantwortet = true;
+
+  let frageObj = aktuelleFragen[index];
+  let buttons = document.querySelectorAll(".answer-btn");
+
+  buttons.forEach((btn, i) => {
+    btn.classList.add("disabled");
+    if (i === frageObj.richtig) {
+      btn.classList.add("correct");
+    }
+  });
+
+  document.getElementById("feedback").innerText = "Zeit abgelaufen";
+  document.getElementById("explanation").innerText =
+    "Richtige Antwort: " + frageObj.antworten[frageObj.richtig] +
+    ". " + (frageObj.erklaerung || "");
+
+  falschBeantwortet.push(frageObj);
+  document.getElementById("nextBtn").classList.remove("hidden");
+}
+
+function nextQuestion() {
+  index++;
+  zeigeFrage();
+}
+
+function quizBeenden() {
+  document.getElementById("quizBox").classList.add("hidden");
+  let result = document.getElementById("result");
+  result.classList.remove("hidden");
+  result.innerHTML =
+    "<h2>Quiz beendet</h2>" +
+    "<p>Direkt richtig beantwortet: " + punktzahl + " von " + fragen.length + "</p>" +
+    "<p>Alle falsch beantworteten Fragen wurden wiederholt, bis sie richtig beantwortet waren.</p>";
+}
+
 zeigeFrage();
-}
-
-function zeigeFrage(){
-if(index >= fragen.length){
-if(falsch.length > 0){
-fragen = falsch;
-falsch = [];
-index = 0;
-alert("Fehlerfragen kommen erneut");
-} else {
-alert("Fertig");
-return;
-}
-}
-
-let f = fragen[index];
-document.getElementById("frage").innerText = f.frage;
-
-let html = "";
-f.antworten.forEach((a,i)=>{
-html += `<button onclick="check(${i})">${a}</button>`;
-});
-document.getElementById("antworten").innerHTML = html;
-
-let t = 120;
-clearInterval(zeit);
-zeit = setInterval(()=>{
-t--;
-document.getElementById("timer").innerText = "Zeit: " + t;
-if(t<=0){
-falsch.push(f);
-index++;
-zeigeFrage();
-}
-},1000);
-}
-
-function check(i){
-clearInterval(zeit);
-if(i !== fragen[index].richtig){
-falsch.push(fragen[index]);
-}
-index++;
-zeigeFrage();
-}
 </script>
 
 </body>
