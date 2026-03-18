@@ -1,109 +1,382 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anästhesie & Schockraum</title>
-<style>
-body {font-family: Arial; background:#111; color:#fff; text-align:center; padding:20px;}
-button {padding:15px; margin:10px; width:90%; font-size:16px;}
-.hidden {display:none;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Anästhesie & Schockraum">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Anästhesie & Schockraum - Exkurs: internistischer Schockraum">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <title>Anästhesie & Schockraum</title>
+  <style>
+    :root {
+      --bg:#0f172a; --bg2:#111827; --card:rgba(255,255,255,0.08); --line:rgba(255,255,255,0.12);
+      --text:#e5eefc; --muted:#b9c7dd; --accent:#38bdf8; --accent2:#8b5cf6; --good:#22c55e; --bad:#ef4444;
+      --goodbg:rgba(34,197,94,0.14); --badbg:rgba(239,68,68,0.14);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;background:
+    radial-gradient(circle at top left, rgba(56,189,248,0.22), transparent 34%),
+    radial-gradient(circle at top right, rgba(139,92,246,0.18), transparent 36%),
+    linear-gradient(180deg,var(--bg),var(--bg2) 45%,#020617);color:var(--text)}
+    body{padding:max(18px,env(safe-area-inset-top)) 14px max(22px,env(safe-area-inset-bottom)) 14px}
+    .app{max-width:920px;margin:0 auto}
+    .screen{display:none} .screen.active{display:block}
+    .hero,.card{border:1px solid var(--line);border-radius:28px;background:rgba(255,255,255,0.08);backdrop-filter:blur(14px);box-shadow:0 20px 60px rgba(0,0,0,0.28)}
+    .hero{padding:24px 20px}
+    .card{margin-top:16px;padding:18px}
+    .badge,.pill,.chip{display:inline-flex;align-items:center;border-radius:999px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.07)}
+    .badge{padding:10px 14px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    h1{margin:14px 0 0;font-size:clamp(30px,8vw,52px);line-height:.98;letter-spacing:-.04em}
+    .subtitle{margin:14px 0 0;color:var(--muted);font-size:clamp(16px,4.2vw,20px);line-height:1.55;max-width:760px}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .chip{padding:10px 14px;font-size:14px;font-weight:600}
+    .grid{display:grid;gap:12px} .grid.two{grid-template-columns:1fr}
+    .kpi{border-radius:20px;padding:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12)}
+    .kpi .label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+    .kpi .value{font-size:28px;font-weight:800}
+    button{width:100%;border:0;cursor:pointer;font:inherit;border-radius:18px;min-height:58px;padding:16px 18px;transition:transform .12s ease}
+    button:active{transform:scale(.99)}
+    .primary{color:white;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 30px rgba(56,189,248,0.24)}
+    .secondary{color:var(--text);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);font-weight:700}
+    .start-actions,.quiz-actions{display:grid;gap:12px;margin-top:18px}
+    .small-note{margin-top:12px;color:var(--muted);font-size:14px;line-height:1.55}
+    .quiz-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    .pill{padding:12px 14px;font-size:14px;font-weight:700}
+    .timer{position:relative;overflow:hidden}
+    .timerbar{position:absolute;left:0;bottom:0;height:4px;width:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);transform-origin:left center}
+    .section{color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;margin-bottom:10px}
+    .question{font-size:clamp(23px,5.6vw,34px);line-height:1.25;font-weight:850;letter-spacing:-.03em;margin-bottom:18px}
+    .answers{display:grid;gap:12px}
+    .answer{text-align:left;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12);color:var(--text);font-size:16px;line-height:1.45;font-weight:650}
+    .answer.correct{background:var(--goodbg);border:1px solid rgba(34,197,94,0.46)}
+    .answer.wrong{background:var(--badbg);border:1px solid rgba(239,68,68,0.46)}
+    .answer.disabled{opacity:.92;cursor:default}
+    .feedback{display:none;margin-top:14px;padding:14px 16px;border-radius:18px;line-height:1.55;font-size:15px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.08)}
+    .feedback.show{display:block} .feedback.good{background:var(--goodbg)} .feedback.bad{background:var(--badbg)}
+    .score{font-size:clamp(54px,16vw,96px);line-height:.95;font-weight:900;letter-spacing:-.06em;margin:10px 0 12px}
+    .result-text{color:var(--muted);font-size:clamp(16px,4.2vw,20px);line-height:1.6;margin-bottom:18px}
+    .list{display:grid;gap:10px;text-align:left} .list-item{padding:14px;border-radius:18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--muted);line-height:1.45;font-size:14px}
+    details.editor{margin-top:18px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06)}
+    details.editor summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:800}
+    details.editor summary::-webkit-details-marker{display:none}
+    .editor-body{padding:0 18px 18px}
+    textarea{width:100%;min-height:240px;margin-top:10px;border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,0.14);background:rgba(2,6,23,0.45);color:#e5eefc;font-size:14px;line-height:1.45;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+    @media (min-width:760px){.grid.two,.start-actions,.quiz-actions{grid-template-columns:repeat(2,minmax(0,1fr))} .quiz-top{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  </style>
 </head>
 <body>
+<div class="app">
+<section id="start-screen" class="screen active">
+  <div class="hero">
+    <div class="badge">Privates Lernquiz</div>
+    <h1>Anästhesie & Schockraum<br><span style="font-size:clamp(18px,4vw,28px);color:var(--muted);font-weight:700">Exkurs: internistischer Schockraum</span></h1>
+    <p class="subtitle">Natürliche medizinische Fragestellungen, 2 Minuten pro Frage, 4 Antwortmöglichkeiten. Fehlerfragen kommen wieder, bis sie richtig sitzen. Pädagogisch unerquicklich, aber wirksam.</p>
+    <div class="chips">
+      <div class="chip">iPhone und iPad optimiert</div>
+      <div class="chip">2 Minuten pro Frage</div>
+      <div class="chip">4 Antwortmöglichkeiten</div>
+      <div class="chip">Wiederholung bis richtig</div>
+    </div>
+  </div>
 
-<h1>Anästhesie & Schockraum</h1>
-<p>Exkurs: internistischer Schockraum</p>
+  <div class="card">
+    <div class="grid two">
+      <div class="kpi"><div class="label">Fragenpool</div><div class="value" id="question-count">0</div></div>
+      <div class="kpi"><div class="label">Zeit pro Frage</div><div class="value">2:00</div></div>
+      <div class="kpi"><div class="label">Antworten</div><div class="value">4</div></div>
+      <div class="kpi"><div class="label">Modus</div><div class="value">Wiederholen bis richtig</div></div>
+    </div>
 
-<div id="start">
-<button onclick="start()">Start</button>
-</div>
+    <div class="start-actions">
+      <button id="start-btn" class="primary" type="button">Quiz starten</button>
+      <button id="shuffle-toggle" class="secondary" type="button">Fragen zufällig mischen: Ein</button>
+    </div>
 
-<div id="quiz" class="hidden">
-<p id="frage"></p>
-<div id="antworten"></div>
-<p id="timer"></p>
+    <div class="small-note">
+      Das ist als PWA vorbereitet. Sobald die Seite einmal korrekt gehostet ist, kannst du sie auf dem iPhone wie eine App zum Home-Bildschirm hinzufügen.
+    </div>
+
+    <details class="editor">
+      <summary>Fragen bearbeiten</summary>
+      <div class="editor-body">
+        <div class="small-note">Format pro Frage: frage, antworten, richtig, erklaerung. Genau 4 Antwortmöglichkeiten. richtig ist 0 bis 3.</div>
+        <textarea id="editor"></textarea>
+        <div class="start-actions">
+          <button id="save-btn" class="primary" type="button">Fragen speichern</button>
+          <button id="reset-btn" class="secondary" type="button">Standardfragen wiederherstellen</button>
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="quiz-screen" class="screen">
+  <div class="card">
+    <div class="quiz-top">
+      <div class="pill" id="progress-pill">Frage 1</div>
+      <div class="pill" id="score-pill">Direkt richtig 0</div>
+      <div class="pill" id="repeat-pill">Noch offen 0</div>
+      <div class="pill timer" id="timer-pill">2:00<div class="timerbar" id="timerbar"></div></div>
+    </div>
+    <div class="section">Prüfungstraining</div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-actions">
+      <button id="next-btn" class="primary" type="button" style="display:none;">Weiter</button>
+      <button id="restart-btn" class="secondary" type="button">Neu starten</button>
+    </div>
+  </div>
+</section>
+
+<section id="result-screen" class="screen">
+  <div class="card" style="text-align:center">
+    <div class="badge">Ergebnis</div>
+    <div class="score" id="final-score">0%</div>
+    <div class="result-text" id="result-text"></div>
+    <div class="list">
+      <div class="list-item" id="result-a"></div>
+      <div class="list-item" id="result-b"></div>
+      <div class="list-item" id="result-c"></div>
+    </div>
+    <div class="start-actions">
+      <button id="again-btn" class="primary" type="button">Nochmal spielen</button>
+      <button id="back-btn" class="secondary" type="button">Zur Startseite</button>
+    </div>
+  </div>
+</section>
 </div>
 
 <script>
-let fragen = [
-{
-frage: "Warum ist der Atemweg bei Bewusstlosen gefährdet?",
-antworten: [
-"Zunge fällt zurück",
-"Kein Gasaustausch",
-"Immer Intubation nötig",
-"Nur mit EKG sicher"
-],
-richtig: 0
-},
-{
-frage: "Was sollte man bei RSI vermeiden?",
-antworten: [
-"Präoxygenierung",
-"Zwischenbeatmung",
-"Teamkommunikation",
-"Laryngoskopie"
-],
-richtig: 1
+const defaultQuestions = [{"frage": "Welche vier Kernziele der Allgemeinanästhesie werden genannt?", "antworten": ["Analgesie, Hypnose, Muskelrelaxierung, Teamkommunikation", "Schmerz ausschalten, bewusstes und unbewusstes Erleben vermeiden, Abwehr oder Bewegung verhindern, Abschirmung vor Reizen", "Präoxygenierung, Intubation, Beatmung, Extubation", "Monitoring, Ultraschall, Gefäßzugang, Absaugung"], "richtig": 1, "erklaerung": "Das sind die klassischen Kernziele der Allgemeinanästhesie."}, {"frage": "Welches der folgenden Medikamente ist ein typisches Opioid-Analgetikum in der Narkose?", "antworten": ["Ibuprofen", "Fentanyl", "Paracetamol", "Metamizol"], "richtig": 1, "erklaerung": "Fentanyl ist ein klassisches stark wirksames Opioid."}, {"frage": "Welche Fentanyl-Dosierung passt typischerweise zur Narkoseeinleitung?", "antworten": ["0,2 bis 0,5 µg/kgKG", "2 bis 4 µg/kgKG", "1 bis 2 mg/kgKG", "0,05 mg fix für alle"], "richtig": 1, "erklaerung": "Für Fentanyl werden 2 bis 4 µg/kgKG angegeben."}, {"frage": "Welche Sufentanil-Dosierung passt typischerweise zur Narkoseeinleitung?", "antworten": ["2 bis 4 µg/kgKG", "0,2 bis 0,5 µg/kgKG", "15 bis 40 mg/kgKG", "0,5 bis 1 mg/kgKG"], "richtig": 1, "erklaerung": "Sufentanil wird mit 0,2 bis 0,5 µg/kgKG dosiert."}, {"frage": "Welches Hypnotikum wird typischerweise mit 1,5 bis 2,5 mg/kgKG dosiert?", "antworten": ["Thiopental", "Midazolam", "Propofol", "Etomidat"], "richtig": 2, "erklaerung": "Propofol liegt typischerweise in diesem Bereich."}, {"frage": "Welches Hypnotikum wird typischerweise mit 2,5 bis 5 mg/kgKG dosiert?", "antworten": ["Ketanest", "Propofol", "Midazolam", "Thiopental"], "richtig": 3, "erklaerung": "Thiopental wird in diesem Bereich dosiert."}, {"frage": "Welche Aussage zu Propofol ist korrekt?", "antworten": ["Propofol ist nur als 2 Prozent Lösung verfügbar", "1 Prozent entspricht 10 mg pro ml und 2 Prozent entspricht 20 mg pro ml", "Propofol wird nur intramuskulär gegeben", "Propofol ist ein Opioid"], "richtig": 1, "erklaerung": "Die Konzentrationsumrechnung ist eine klassische Prüfungsfalle."}, {"frage": "Welches Muskelrelaxans wird typischerweise mit 0,5 bis 1 mg pro kgKG dosiert?", "antworten": ["Succinylcholin", "Rocuronium", "Atracurium", "Mivacurium"], "richtig": 1, "erklaerung": "Rocuronium ist ein häufig genutztes nicht depolarisierendes Relaxans."}, {"frage": "Welches Muskelrelaxans wird typischerweise mit 1 bis 1,5 mg pro kgKG dosiert?", "antworten": ["Rocuronium", "Atracurium", "Succinylcholin", "Vecuronium"], "richtig": 2, "erklaerung": "Succinylcholin wird klassisch in diesem Bereich dosiert."}, {"frage": "Wie wirkt Succinylcholin?", "antworten": ["Über kompetitive Hemmung nikotinischer Rezeptoren", "Über Dauerdepolarisierung an der motorischen Endplatte", "Über GABA-Rezeptoren", "Als Opioidagonist"], "richtig": 1, "erklaerung": "Succinylcholin führt zu einer Dauerdepolarisierung und danach zur Relaxation."}, {"frage": "Welche Besonderheit hat Rocuronium im Notfallmanagement?", "antworten": ["Es kann mit Sugammadex rasch antagonisiert werden", "Es wirkt nur intramuskulär", "Es führt regelhaft zu Hyperkaliämie", "Es ist gleichzeitig ein Hypnotikum"], "richtig": 0, "erklaerung": "Die Antagonisierung mit Sugammadex ist klinisch relevant."}, {"frage": "Was gehört zum obligaten Basismonitoring bei der Narkose?", "antworten": ["Pulsoxymetrie, 3-Kanal-EKG und automatische Blutdruckmessung", "Nur Kapnographie", "Nur arterielle Blutdruckmessung", "Nur EEG"], "richtig": 0, "erklaerung": "Diese drei Komponenten sind die Basis."}, {"frage": "Welche zusätzliche Überwachung ist bei beatmeten Patienten besonders wichtig?", "antworten": ["Kapnometrie oder Kapnographie", "Otoskopie", "Langzeit-EKG", "Peak Flow"], "richtig": 0, "erklaerung": "Kapnographie ist zentral zur Kontrolle von Ventilation und Tubuslage."}, {"frage": "Was gehört zur guten Vorbereitung einer Notfallnarkose?", "antworten": ["Präoxygenierung, vollständiges Equipment, funktionierende Absaugung und Plan B", "Nur eine Kanüle und eine Spritze Propofol", "Nur ein Laryngoskop", "Nur ein Opioid"], "richtig": 0, "erklaerung": "Vorbereitung schlägt hektische Improvisation."}, {"frage": "Welcher systolische Blutdruckabfall ist bei der Narkoseeinleitung als Faustregel noch tolerabel?", "antworten": ["10 Prozent", "20 Prozent", "30 Prozent", "40 Prozent"], "richtig": 1, "erklaerung": "Mehr als 20 Prozent Abfall sollte man nicht einfach akzeptieren."}, {"frage": "Welcher MAP-Wert sollte keinesfalls toleriert werden?", "antworten": ["Unter 80 mmHg", "Unter 75 mmHg", "Unter 65 mmHg", "Unter 55 mmHg"], "richtig": 2, "erklaerung": "Ein MAP unter 65 mmHg ist kritisch."}, {"frage": "Welche einfache Sofortmaßnahme kann bei Blutdruckabfall nach Einleitung helfen?", "antworten": ["Trendelenburg-Lagerung", "Bauchlage", "PEEP stark erhöhen", "Sofort extubieren"], "richtig": 0, "erklaerung": "Lagerung kann kurzfristig stabilisieren."}, {"frage": "Welche Medikamentengruppe wird bei hämodynamischer Instabilität häufig benötigt?", "antworten": ["Antibiotika", "Vasopressoren", "Antiemetika", "Antihistaminika"], "richtig": 1, "erklaerung": "Bei vasoplegischer oder kreislaufrelevanter Instabilität braucht es oft Vasopressoren."}, {"frage": "Welches Medikament wird im klinischen Alltag häufig als Bolusmittel bei Blutdruckabfall genutzt?", "antworten": ["Akrinor", "Salbutamol", "Heparin", "Insulin"], "richtig": 0, "erklaerung": "Akrinor wird häufig als pragmatische Bolustherapie verwendet."}, {"frage": "Welche Noradrenalin-Verdünnung ist als pragmatischer Notfallansatz gebräuchlich?", "antworten": ["1 mg auf 100 ml NaCl", "10 mg auf 1 ml pur", "1 mg auf 1 Liter Glukose", "25 mg als Bolus"], "richtig": 0, "erklaerung": "Eine gebräuchliche Verdünnung ist 1 mg Noradrenalin in 100 ml NaCl."}, {"frage": "Welche Reihenfolge beschreibt eine klassische Narkoseeinleitung am besten?", "antworten": ["Präoxygenierung, Narkoseeinleitung, gegebenenfalls Zwischenbeatmung, Intubation, stabile Narkose", "Intubation, Präoxygenierung, Opioidgabe, Überwachung", "Sedierung, Extubation, Larynxmaske, Präoxygenierung", "Nur Präoxygenierung und dann Transport"], "richtig": 0, "erklaerung": "Das ist der typische strukturierte Ablauf."}, {"frage": "Welche Maßnahmen gehören zu den Basismaßnahmen zur Atemwegsoffenhaltung?", "antworten": ["Inspektion, Fremdkörper entfernen, Absaugen und Esmarch-Handgriff", "Nur Intubation", "Nur Wendl-Tubus", "Nur Videolaryngoskop"], "richtig": 0, "erklaerung": "Vor jedem größeren Eingriff stehen die Basics."}, {"frage": "Welche Aussage zum Guedel-Tubus ist richtig?", "antworten": ["Er bietet sicheren Aspirationsschutz", "Er ist ein Oropharyngealtubus aus festem Kunststoff", "Er ist bei erhaltenen Abwehrreflexen besonders geeignet", "Er ist ein infraglottischer Atemweg"], "richtig": 1, "erklaerung": "Der Guedel-Tubus hält vor allem die Zunge frei."}, {"frage": "Welche Kontraindikation gilt für den Guedel-Tubus?", "antworten": ["Hypotonie", "Erhaltene Abwehrreflexe", "Fieber", "Tachykardie"], "richtig": 1, "erklaerung": "Bei erhaltenen Schutzreflexen drohen Würgen und Erbrechen."}, {"frage": "Welche Aussage zum Wendl-Tubus ist korrekt?", "antworten": ["Er ist ein Oropharyngealtubus", "Er ist ein weicher Nasopharyngealtubus", "Er bietet sicheren Aspirationsschutz", "Er ist bei Schädelbasisfraktur ideal"], "richtig": 1, "erklaerung": "Der Wendl-Tubus verläuft nasal in den Nasopharynx."}, {"frage": "Wann ist ein Wendl-Tubus problematisch oder kontraindiziert?", "antworten": ["Bei schwerer Gerinnungsstörung oder Schädelbasisverletzung", "Bei Fieber", "Bei Hypertonie", "Bei normaler Vigilanz"], "richtig": 0, "erklaerung": "Das Risiko von Blutung oder Fehlplatzierung spielt hier eine Rolle."}, {"frage": "Welche Aussage zu Guedel- und Wendl-Tubus ist richtig?", "antworten": ["Sie sichern zuverlässig vor Aspiration", "Sie verhindern vor allem das Zurückfallen der Zunge, bieten aber keinen sicheren Aspirationsschutz", "Sie ersetzen die Intubation vollständig", "Sie dürfen nur im OP verwendet werden"], "richtig": 1, "erklaerung": "Sie sind Hilfsmittel, aber keine definitive Aspirationsprophylaxe."}, {"frage": "Wie sind supraglottische Atemwegshilfen im Schockraum einzuordnen?", "antworten": ["Immer Mittel der ersten Wahl", "Nie erlaubt", "Nicht erste Wahl, aber wichtige Rückfallebene", "Nur für Neonaten geeignet"], "richtig": 2, "erklaerung": "Sie sind besonders als Backup relevant."}, {"frage": "Welche Haltung ist beim schwierigen Atemweg richtig?", "antworten": ["Möglichst viele Intubationsversuche ohne Unterbrechung", "Früh vorausplanen, Hilfe holen und Ressourcen mobilisieren", "Nur auf Glück hoffen", "Plan B erst nach zehn Minuten"], "richtig": 1, "erklaerung": "Zu spätes Umschalten ist oft der eigentliche Fehler."}, {"frage": "Wann spricht man von cannot intubate, cannot oxygenate?", "antworten": ["Wenn der Patient hustet", "Wenn weder Intubation noch ausreichende Oxygenierung gelingt", "Wenn ein Guedel-Tubus nicht passt", "Wenn der erste Versuch schwierig war"], "richtig": 1, "erklaerung": "Dann braucht es rasch eine lebensrettende Eskalation."}, {"frage": "Welchen Vorteil hat die volumenkontrollierte Beatmung?", "antworten": ["Garantiertes Inspirationsvolumen", "Niedrigste Beatmungsdrücke in jedem Fall", "Automatische Spontanatmung", "Kein Risiko für Volutrauma"], "richtig": 0, "erklaerung": "Das Volumen ist definiert, die Drücke können aber ansteigen."}, {"frage": "Welcher Nachteil gehört zur volumenkontrollierten Beatmung?", "antworten": ["Unmöglichkeit der CO2-Messung", "Hohe Scherkräfte und mitunter hohe Beatmungsdrücke", "Kein PEEP einstellbar", "Keine Oxygenierung möglich"], "richtig": 1, "erklaerung": "Die kontrollierte Volumenvorgabe kann bei schlechter Compliance zu hohen Drücken führen."}, {"frage": "Welche Beatmungsform gilt meist als lungenprotektiver?", "antworten": ["Volumenkontrollierte Beatmung", "Druckkontrollierte Beatmung", "Beutelbeatmung ohne Ventil", "Reine Sauerstoffbrille"], "richtig": 1, "erklaerung": "Druckkontrollierte Beatmung begrenzt die Spitzendrücke besser."}, {"frage": "Welcher Nachteil der druckkontrollierten Beatmung ist typisch?", "antworten": ["Unbemerkte Hypoventilation bei verändertem Tidalvolumen", "Kein PEEP möglich", "Keine CO2-Kontrolle", "Sie ist nur präklinisch möglich"], "richtig": 0, "erklaerung": "Wenn Compliance oder Widerstand sich ändern, ändert sich auch das Volumen."}, {"frage": "Welches Tidalvolumen wird bei vielen Erwachsenen lungenprotektiv angestrebt?", "antworten": ["3 bis 5 ml pro kg Istgewicht", "6 bis 8 ml pro kg Idealgewicht", "10 bis 12 ml pro kg Körpergewicht", "15 ml pro kg Körpergewicht"], "richtig": 1, "erklaerung": "Entscheidend ist das Idealgewicht."}, {"frage": "Welcher Inspirationsdruckbereich ist als grober Startwert häufig sinnvoll?", "antworten": ["5 bis 8 mbar", "8 bis 10 mbar", "12 bis 15 mbar", "20 bis 25 mbar"], "richtig": 2, "erklaerung": "12 bis 15 mbar ist ein typischer Ausgangsbereich."}, {"frage": "Welche Atemfrequenz ist als Startwert für viele beatmete Erwachsene plausibel?", "antworten": ["6 bis 8 pro Minute", "8 bis 10 pro Minute", "10 bis 12 pro Minute", "18 bis 24 pro Minute"], "richtig": 2, "erklaerung": "10 bis 12 pro Minute ist ein gängiger Startwert."}, {"frage": "Welcher PEEP-Bereich ist als Standardstartwert häufig sinnvoll?", "antworten": ["0 bis 2 mbar", "3 bis 4 mbar", "5 bis 8 mbar", "12 bis 15 mbar"], "richtig": 2, "erklaerung": "PEEP 5 bis 8 mbar ist ein typischer Startbereich."}, {"frage": "Welcher Parameter ist besonders wichtig als Feedback für die Ventilation?", "antworten": ["INR", "etCO2 oder paCO2", "Kalium", "Leukozyten"], "richtig": 1, "erklaerung": "CO2-Werte zeigen, ob die Ventilation ausreicht."}, {"frage": "Wann spricht man definitionsgemäß von einem Polytrauma nach Berliner Definition?", "antworten": ["Bei jeder einzelnen Fraktur", "Bei schweren Verletzungen in mindestens zwei Körperregionen plus mindestens einem Zusatzkriterium", "Nur bei Verkehrsunfällen", "Nur bei GCS 3"], "richtig": 1, "erklaerung": "Die Berliner Definition kombiniert Verletzungsmuster und physiologische Zusatzkriterien."}, {"frage": "Welches Zusatzkriterium passt zur Berliner Polytrauma-Definition?", "antworten": ["SpO2 unter 99 Prozent", "RR systolisch 90 mmHg oder darunter", "Hb unter 14 g pro dl", "Temperatur 36,8 Grad"], "richtig": 1, "erklaerung": "Hypotonie ist eines der zentralen Zusatzkriterien."}, {"frage": "Welcher neurologische Grenzwert ist ein Zusatzkriterium der Berliner Definition?", "antworten": ["GCS 14", "GCS 13", "GCS 10", "GCS 8 oder darunter"], "richtig": 3, "erklaerung": "Bewusstlosigkeit mit GCS 8 oder weniger gehört dazu."}, {"frage": "Welcher Gerinnungswert passt als Zusatzkriterium zur Berliner Definition?", "antworten": ["INR 1,4 oder höher", "INR 1,0", "Quick 100 Prozent", "Fibrinogen 4 g pro l"], "richtig": 0, "erklaerung": "Eine Koagulopathie ist prognostisch bedeutsam."}, {"frage": "Welche Altersgrenze ist als Zusatzkriterium in der Berliner Definition relevant?", "antworten": ["60 Jahre", "65 Jahre", "70 Jahre", "75 Jahre"], "richtig": 2, "erklaerung": "Alter 70 oder mehr ist ein Zusatzkriterium."}, {"frage": "Wie lässt sich Schockraum A gegenüber Schockraum B sinnvoll abgrenzen?", "antworten": ["A für leichte Fälle, B für Entlassungen", "A für offensichtlich Schwerverletzte, B für potenziell Schwerverletzte nach Mechanismus oder Einschätzung", "A nur für internistische Patienten, B nur für chirurgische", "A nur nachts, B tagsüber"], "richtig": 1, "erklaerung": "So wird die praktische Einteilung beschrieben."}, {"frage": "Was gehört bereits vor Ankunft des Patienten zu einer guten Schockraumvorbereitung?", "antworten": ["Nur CT reservieren", "Eigenschutz, Ressourcenmanagement, Rollenklärung und individuelle Vorbereitung", "Nur Narkosemedikamente richten", "Nur Blutprodukte bestellen"], "richtig": 1, "erklaerung": "Der Schockraum beginnt organisatorisch vor dem Eintreffen des Patienten."}, {"frage": "Welche Zeitspanne umfasst Phase Alpha im Schockraumkonzept?", "antworten": ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "30 bis 60 Minuten"], "richtig": 0, "erklaerung": "Phase Alpha ist die erste ultrakurze Stabilisationsphase."}, {"frage": "Was ist das Ziel von Phase Alpha?", "antworten": ["Komplette OP-Freigabe", "Initiale Stabilisierung mit Basismonitoring und Basisdiagnostik", "Nur Dokumentation", "Nur Sonographie"], "richtig": 1, "erklaerung": "Hier geht es um das unmittelbare Sichern lebenswichtiger Funktionen."}, {"frage": "Welche Zeitspanne umfasst Phase Bravo?", "antworten": ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "30 bis 90 Minuten"], "richtig": 1, "erklaerung": "Phase Bravo folgt auf die initiale Stabilisierung."}, {"frage": "Was ist das Ziel von Phase Bravo?", "antworten": ["Komplette klinische Untersuchung, erweitertes Monitoring und spezifische Diagnostik", "Nur Blutabnahme", "Nur Reevaluation", "Nur Transportplanung"], "richtig": 0, "erklaerung": "Hier wird systematisch erweitert und präzisiert."}, {"frage": "Welche Zeitspanne umfasst Phase Charlie?", "antworten": ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "45 bis 90 Minuten"], "richtig": 2, "erklaerung": "Phase Charlie dient der Vervollständigung und Entscheidungsfindung."}, {"frage": "Was ist das Hauptziel von Phase Charlie?", "antworten": ["Abschluss notwendiger Diagnostik und interdisziplinäre Entscheidung über das weitere Vorgehen", "Nur Wärmeerhalt", "Nur CT ohne Rücksprache", "Nur Verlegung in den Aufwachraum"], "richtig": 0, "erklaerung": "Am Ende muss eine saubere therapeutische Entscheidung stehen."}, {"frage": "Was muss im Schockraum regelmäßig und bei jeder Zustandsänderung erfolgen?", "antworten": ["Neue Intubation", "Reevaluation nach xABCDE", "Neue Blutgruppe", "Nur neue BGA"], "richtig": 1, "erklaerung": "Der Zustand ändert sich, also muss die Struktur wiederholt werden."}, {"frage": "Wofür steht das x beziehungsweise c in xABCDE?", "antworten": ["Control bleeding oder C-spine control", "Cardiac cycle", "Computed tomography", "Critical care"], "richtig": 0, "erklaerung": "Je nach Schema steht x für Blutungskontrolle, c für HWS-Schutz."}, {"frage": "Was gehört bei xABCDE zum Buchstaben A?", "antworten": ["Atemweg sichern unter Beachtung der HWS-Immobilisation", "Blutung stillen", "Neurologische Prüfung", "Entkleiden"], "richtig": 0, "erklaerung": "A steht für Airway."}, {"frage": "Was gehört bei xABCDE zum B?", "antworten": ["O2-Gabe, Pleura entlasten und Beatmung sicherstellen", "Nur Pupillen prüfen", "Nur BGA", "Nur Druckverband"], "richtig": 0, "erklaerung": "B steht für Breathing und umfasst Oxygenierung und Ventilation."}, {"frage": "Was gehört bei xABCDE zum C?", "antworten": ["Perikard entlasten, Blutung kontrollieren, Volumen und Katecholamine", "Nur EKG schreiben", "Nur Schmerztherapie", "Nur CT anfordern"], "richtig": 0, "erklaerung": "C steht für Circulation und umfasst die Behandlung des Kreislaufs."}, {"frage": "Was gehört bei xABCDE zum D?", "antworten": ["Neurologische Beurteilung einschließlich Bildgebung und neurotraumatologischer Konsequenzen", "Nur Wärmeerhalt", "Nur Pulskontrolle", "Nur Bauchsonographie"], "richtig": 0, "erklaerung": "D steht für Disability."}, {"frage": "Was gehört bei xABCDE zum E?", "antworten": ["Entkleiden, Log Roll und Schutz vor Wärmeverlust", "Nur EKG", "Nur Thoraxdrainage", "Nur arterielle Punktion"], "richtig": 0, "erklaerung": "Exposure darf nie ohne Wärmemanagement gedacht werden."}, {"frage": "Welche FiO2 erreicht eine Nasenbrille mit 1 bis 4 l pro Minute ungefähr?", "antworten": ["0,21 bis 0,24", "0,25 bis 0,4", "0,5 bis 0,75", "1,0"], "richtig": 1, "erklaerung": "Die Nasenbrille liefert nur moderate FiO2-Steigerungen."}, {"frage": "Welche FiO2 kann eine Sauerstoffreservoirmaske ungefähr erreichen?", "antworten": ["0,25 bis 0,3", "0,25 bis 0,4", "0,3 bis 0,6", "0,5 bis 0,75"], "richtig": 3, "erklaerung": "Mit Reservoirmaske sind deutlich höhere FiO2 erreichbar."}, {"frage": "Welche Zugangsoption sollte man bei schwierigen Venenverhältnissen früh mitdenken?", "antworten": ["Portsystem", "Intraossärer Zugang", "Nur ZVK", "Nur Arterie"], "richtig": 1, "erklaerung": "Der i.o.-Zugang ist im Notfall eine wichtige Rettungsleine."}, {"frage": "Welche Aussage trifft auf den zentralvenösen Zugang zu?", "antworten": ["Er erlaubt auch bei schlechten peripheren Venenverhältnissen einen sicheren Zugang", "Er ist immer schneller als eine periphere Kanüle", "Er ersetzt jede Volumentherapie", "Er ist nur zur Blutentnahme gedacht"], "richtig": 0, "erklaerung": "Sein Vorteil ist die sichere zentrale Zugänglichkeit."}, {"frage": "Welche Komponenten gehören zur Volumentherapie bei relevantem Blutverlust?", "antworten": ["Nur Kristalloide", "Erythrozytenkonzentrate, Plasma, Thrombozyten und Gerinnungsfaktoren nach Protokoll", "Nur Albumin", "Nur Glukose"], "richtig": 1, "erklaerung": "Blutverlust wird nicht mit Fantasie ersetzt."}, {"frage": "Welche Katecholamine werden in der Notfallmedizin besonders häufig genutzt?", "antworten": ["Dobutamin, Milrinon, Theophyllin, Digoxin", "Akrinor, Noradrenalin, Adrenalin, Vasopressin", "Nur Insulin", "Nur Heparin"], "richtig": 1, "erklaerung": "Das sind typische Beispiele aus Akut- und Schockraumversorgung."}, {"frage": "Welche Parameter gehören zur neurologischen Erstbeurteilung bei D?", "antworten": ["Bewusstseinslage, Pupillenstatus und neurologischer Status", "Nur Pupillenweite", "Nur GCS", "Nur Blutzucker"], "richtig": 0, "erklaerung": "D braucht mehr als nur einen einzelnen Wert."}, {"frage": "Welche Stoffwechsellage muss bei D immer mitgedacht werden?", "antworten": ["Hypo- oder Hyperglykämie", "Hyperurikämie", "Hypercholesterinämie", "Anämie"], "richtig": 0, "erklaerung": "Glukosestörungen können neurologische Symptome imitieren."}, {"frage": "Wie sind Polytraumapatienten bezüglich Schmerztherapie oft versorgt?", "antworten": ["Eher überanalgetisiert", "Häufig analgetisch unterversorgt", "Immer perfekt versorgt", "Analgesie ist bei ihnen meist unnötig"], "richtig": 1, "erklaerung": "Schmerztherapie kommt im Chaos der Erstversorgung oft zu kurz."}, {"frage": "Welches Spannungsfeld ist bei der Analgesie im Trauma besonders wichtig?", "antworten": ["Schmerzfreiheit versus neurologische Beurteilbarkeit", "Analgesie versus Pulsoxymetrie", "Analgesie versus Lagerung", "Analgesie versus EKG"], "richtig": 0, "erklaerung": "Zu viel Sedierung kann die klinische Beurteilung erschweren."}, {"frage": "Welche Strategie ist bei wachem, spontan atmendem Traumapatienten sinnvoll?", "antworten": ["Titrierte Gabe kleiner Dosen geeigneter Analgetika", "Sofort tiefe Vollnarkose", "Nur Zureden", "Schmerz ignorieren"], "richtig": 0, "erklaerung": "Titrierte Analgesie unter Erhalt der Spontanatmung ist oft sinnvoll."}, {"frage": "Welche Beispielgabe passt zu Fentanyl in kleinen Analgesieschritten?", "antworten": ["0,05 mg i.v.", "5 mg i.v.", "50 mg i.v.", "0,5 g i.v."], "richtig": 0, "erklaerung": "0,05 mg entsprechen 50 µg."}, {"frage": "Welche kleine titrierte Dosis Sufentanil ist als Beispiel plausibel?", "antworten": ["50 µg", "25 µg", "5 µg", "0,5 mg"], "richtig": 2, "erklaerung": "Sufentanil ist potent, deshalb sind kleine Mikrogramm-Dosen relevant."}, {"frage": "Welche kleine titrierte Dosis Morphin ist als Beispiel plausibel?", "antworten": ["1 mg i.v.", "10 mg i.v.", "30 mg i.v.", "100 mg i.v."], "richtig": 0, "erklaerung": "Bei instabilen Patienten ist titriertes Vorgehen sinnvoll."}, {"frage": "Welche Aussage zu Esketamin beziehungsweise Ketanest ist richtig?", "antworten": ["Niedrige Dosis analgesiert, mittlere Dosis sediert, hohe Dosis kann mit Zusatzmedikation zur Anästhesie beitragen", "Es ist nur ein Antiemetikum", "Es darf beim Trauma nie gegeben werden", "Es ist nur oral einsetzbar"], "richtig": 0, "erklaerung": "Esketamin ist dosisabhängig vielseitig einsetzbar."}, {"frage": "Was sollte neben Opiaten bei Schmerztherapie zusätzlich mitgedacht werden?", "antworten": ["Koanalgetika, unterstützende Maßnahmen und psychologische Begleitung", "Nur Fixierung", "Nur Sauerstoff", "Nur Katecholamine"], "richtig": 0, "erklaerung": "Schmerz ist nicht nur Pharmakologie."}, {"frage": "Was gehört bei E zwingend dazu?", "antworten": ["Vollständiges Entkleiden und Untersuchung aller Körperregionen bei gleichzeitigem Wärmeschutz", "Nur Wärmedecke", "Nur BGA", "Nur Log Roll ohne Inspektion"], "richtig": 0, "erklaerung": "Exposure ohne Überblick ist halb blind."}, {"frage": "Welche Aussage zur Hypothermie und Gerinnung ist richtig?", "antworten": ["Hypothermie verbessert die Gerinnung", "Pro Grad Temperaturverlust kann die Gerinnungsaktivität deutlich sinken", "Temperatur spielt für die Gerinnung keine Rolle", "Unter 35 Grad gerinnt Blut besser"], "richtig": 1, "erklaerung": "Hypothermie verschlechtert die Gerinnung relevant."}, {"frage": "Wie hoch ist die Letalität nicht traumatologischer Schockraumpatienten grob?", "antworten": ["5 bis 10 Prozent", "10 bis 20 Prozent", "29 bis 40 Prozent", "60 bis 80 Prozent"], "richtig": 2, "erklaerung": "Auch der internistische Schockraum ist alles andere als harmlos."}, {"frage": "Welche High-Flow-Einstellungen sind grundsätzlich typisch?", "antworten": ["FiO2 0,21 bis 1,0 und Flow 20 bis 60 l pro Minute", "Nur 2 l pro Minute", "Nur FiO2 1,0 ohne Flowanpassung", "Nur Flow 5 l pro Minute"], "richtig": 0, "erklaerung": "High Flow lebt gerade von hohem Flow und variabler FiO2."}, {"frage": "Welcher Vorteil von High Flow ist korrekt?", "antworten": ["Sicherer Aspirationsschutz", "Totraumspülung", "Automatische Intubationsvermeidung", "Keine Überwachung nötig"], "richtig": 1, "erklaerung": "High Flow kann den nasopharyngealen Totraum spülen."}, {"frage": "Welcher weitere Vorteil von High Flow ist typisch?", "antworten": ["Hohe Akzeptanz und gute Verträglichkeit", "Tiefe Sedierung", "Völlige Unabhängigkeit von Spontanatmung", "Kein Bedarf an O2-Quelle"], "richtig": 0, "erklaerung": "High Flow wird oft besser toleriert als enge Maskensysteme."}, {"frage": "Welcher Vorteil der NIV ist korrekt?", "antworten": ["Nahezu 100 Prozent Sauerstoff sind möglich", "Sie braucht nie Monitoring", "Aspiration ist ausgeschlossen", "Sie ist immer angenehmer als High Flow"], "richtig": 0, "erklaerung": "NIV kann hohe FiO2 und Druckunterstützung liefern."}, {"frage": "Welche weitere Wirkung der NIV ist klinisch wichtig?", "antworten": ["Reduktion der Atemarbeit", "Automatische Analgesie", "Senkung des Blutzuckers", "Sichere Aspirationsvermeidung"], "richtig": 0, "erklaerung": "NIV kann die Atemarbeit deutlich entlasten."}, {"frage": "Welcher Spitzendruck sollte bei NIV im Regelfall nicht überschritten werden?", "antworten": ["15 cmH2O", "20 cmH2O", "25 cmH2O", "35 cmH2O"], "richtig": 2, "erklaerung": "Zu hohe Drücke erhöhen das Risiko für Leckage und Mageninsufflation."}, {"frage": "Welche Aussage zur NIV ist richtig?", "antworten": ["NIV ist nicht gleich NIV", "NIV bedeutet immer CPAP", "NIV ersetzt jede Intubation", "NIV darf im Schockraum nie eingesetzt werden"], "richtig": 0, "erklaerung": "CPAP, Druckunterstützung und Bilevel sind eben nicht dasselbe."}, {"frage": "Welche Form der nichtinvasiven Atemunterstützung arbeitet mit kontinuierlichem PEEP ohne zusätzliche Druckunterstützung?", "antworten": ["CPAP", "PSV", "Bilevel", "High Flow"], "richtig": 0, "erklaerung": "CPAP liefert einen konstanten positiven Atemwegsdruck."}, {"frage": "Welche Form kombiniert PEEP mit Druckunterstützung?", "antworten": ["CPAP", "NIPPV beziehungsweise PSV", "Reservoirmaske", "Nasenbrille"], "richtig": 1, "erklaerung": "PSV oder NIPPV unterstützt die Inspiration zusätzlich."}, {"frage": "Welche Form entspricht einer druckkontrollierten nichtinvasiven Beatmung?", "antworten": ["CPAP", "PSV", "Bilevel", "O2-Brille"], "richtig": 2, "erklaerung": "Bilevel nutzt zwei Druckniveaus und ist druckkontrolliert."}, {"frage": "Welche Haltung ist im Umgang mit Lehrmaterialien und Dosierungen immer richtig?", "antworten": ["Blind übernehmen, egal was lokal gilt", "Mit Evidenz, klinischem Kontext und lokalen SOPs abgleichen", "Nur nach Gefühl handeln", "Nur machen, was jemand einmal erzählt hat"], "richtig": 1, "erklaerung": "Lehre ersetzt nie klinische Verantwortung und lokale Standards."}];
+const STORAGE_KEY = "anaesthesie_schockraum_quiz_pwa_v1";
+const SETTINGS_KEY = "anaesthesie_schockraum_quiz_settings_v1";
+
+const startScreen = document.getElementById("start-screen");
+const quizScreen = document.getElementById("quiz-screen");
+const resultScreen = document.getElementById("result-screen");
+const questionCountEl = document.getElementById("question-count");
+const editor = document.getElementById("editor");
+const startBtn = document.getElementById("start-btn");
+const saveBtn = document.getElementById("save-btn");
+const resetBtn = document.getElementById("reset-btn");
+const shuffleToggle = document.getElementById("shuffle-toggle");
+const progressPill = document.getElementById("progress-pill");
+const scorePill = document.getElementById("score-pill");
+const repeatPill = document.getElementById("repeat-pill");
+const timerPill = document.getElementById("timer-pill");
+const timerbar = document.getElementById("timerbar");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("next-btn");
+const restartBtn = document.getElementById("restart-btn");
+const finalScoreEl = document.getElementById("final-score");
+const resultTextEl = document.getElementById("result-text");
+const resultA = document.getElementById("result-a");
+const resultB = document.getElementById("result-b");
+const resultC = document.getElementById("result-c");
+const againBtn = document.getElementById("again-btn");
+const backBtn = document.getElementById("back-btn");
+
+let settings = loadSettings();
+let questionBank = loadQuestions();
+let queue = [];
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+let secondsLeft = 120;
+let timer = null;
+let firstPassCount = 0;
+let repeatedCount = 0;
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => null));
 }
-];
 
-let index = 0;
-let falsch = [];
-let zeit;
-
-function start(){
-document.getElementById("start").classList.add("hidden");
-document.getElementById("quiz").classList.remove("hidden");
-zeigeFrage();
+function loadSettings() {
+  try {
+    return Object.assign({ shuffle: true }, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"));
+  } catch {
+    return { shuffle: true };
+  }
 }
-
-function zeigeFrage(){
-if(index >= fragen.length){
-if(falsch.length > 0){
-fragen = falsch;
-falsch = [];
-index = 0;
-alert("Fehlerfragen kommen nochmal");
-} else {
-alert("Fertig");
-return;
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
+function loadQuestions() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    return Array.isArray(raw) && raw.length ? raw : defaultQuestions;
+  } catch {
+    return defaultQuestions;
+  }
 }
-
-let f = fragen[index];
-document.getElementById("frage").innerText = f.frage;
-let html = "";
-
-f.antworten.forEach((a,i)=>{
-html += `<button onclick="check(${i})">${a}</button>`;
+function saveQuestions(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data, null, 2));
+}
+function validateQuestions(data) {
+  if (!Array.isArray(data) || !data.length) throw new Error("Mindestens eine Frage ist nötig.");
+  data.forEach((q, i) => {
+    if (!q.frage || typeof q.frage !== "string") throw new Error(`Frage ${i+1}: frage fehlt.`);
+    if (!Array.isArray(q.antworten) || q.antworten.length !== 4) throw new Error(`Frage ${i+1}: genau 4 Antwortmöglichkeiten nötig.`);
+    if (!Number.isInteger(q.richtig) || q.richtig < 0 || q.richtig > 3) throw new Error(`Frage ${i+1}: richtig muss 0 bis 3 sein.`);
+  });
+}
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function updateStartUi() {
+  questionBank = loadQuestions();
+  questionCountEl.textContent = questionBank.length;
+  editor.value = JSON.stringify(questionBank, null, 2);
+  shuffleToggle.textContent = `Fragen zufällig mischen: ${settings.shuffle ? "Ein" : "Aus"}`;
+}
+function showScreen(el) {
+  [startScreen, quizScreen, resultScreen].forEach(x => x.classList.remove("active"));
+  el.classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cloneQuestion(q) {
+  return JSON.parse(JSON.stringify(q));
+}
+function startQuiz() {
+  questionBank = loadQuestions();
+  queue = settings.shuffle ? shuffle(questionBank).map(cloneQuestion) : questionBank.map(cloneQuestion);
+  firstPassCount = queue.length;
+  currentIndex = 0;
+  score = 0;
+  repeatedCount = 0;
+  answered = false;
+  showScreen(quizScreen);
+  renderQuestion();
+}
+function renderQuestion() {
+  clearInterval(timer);
+  answered = false;
+  secondsLeft = 120;
+  const q = queue[currentIndex];
+  progressPill.textContent = `Frage ${currentIndex + 1}`;
+  scorePill.textContent = `Direkt richtig ${score}`;
+  repeatPill.textContent = `Noch offen ${queue.length - currentIndex}`;
+  questionEl.textContent = q.frage;
+  answersEl.innerHTML = "";
+  feedbackEl.className = "feedback";
+  feedbackEl.textContent = "";
+  nextBtn.style.display = "none";
+  q.antworten.forEach((ans, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "answer";
+    btn.type = "button";
+    btn.textContent = ans;
+    btn.addEventListener("click", () => answerQuestion(idx, false));
+    answersEl.appendChild(btn);
+  });
+  updateTimerUi();
+  timer = setInterval(() => {
+    secondsLeft -= 1;
+    updateTimerUi();
+    if (secondsLeft <= 0) {
+      clearInterval(timer);
+      answerQuestion(-1, true);
+    }
+  }, 1000);
+}
+function updateTimerUi() {
+  const min = Math.floor(secondsLeft / 60);
+  const sec = String(secondsLeft % 60).padStart(2, "0");
+  timerPill.childNodes[0].nodeValue = `${min}:${sec}`;
+  timerbar.style.transform = `scaleX(${secondsLeft/120})`;
+}
+function answerQuestion(selectedIndex, timeout) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
+  const q = queue[currentIndex];
+  const buttons = [...document.querySelectorAll(".answer")];
+  buttons.forEach((btn, idx) => {
+    btn.classList.add("disabled");
+    if (idx === q.richtig) btn.classList.add("correct");
+  });
+  const correct = !timeout && selectedIndex === q.richtig;
+  if (correct) {
+    if (!q.repeated) score += 1;
+  } else {
+    const retry = cloneQuestion(q);
+    retry.repeated = true;
+    queue.push(retry);
+    repeatedCount += 1;
+    if (!timeout && selectedIndex >= 0 && buttons[selectedIndex]) buttons[selectedIndex].classList.add("wrong");
+  }
+  scorePill.textContent = `Direkt richtig ${score}`;
+  repeatPill.textContent = `Noch offen ${queue.length - currentIndex}`;
+  feedbackEl.className = `feedback show ${correct ? "good" : "bad"}`;
+  if (timeout) {
+    feedbackEl.textContent = `Zeit abgelaufen. Richtig wäre: ${q.antworten[q.richtig]}. ${q.erklaerung || ""}`.trim();
+  } else if (correct) {
+    feedbackEl.textContent = `Richtig. ${q.erklaerung || ""}`.trim();
+  } else {
+    feedbackEl.textContent = `Nicht richtig. Diese Frage kommt später noch einmal. Richtig wäre: ${q.antworten[q.richtig]}. ${q.erklaerung || ""}`.trim();
+  }
+  nextBtn.textContent = currentIndex < queue.length - 1 ? "Nächste Frage" : "Ergebnis ansehen";
+  nextBtn.style.display = "block";
+}
+function finishQuiz() {
+  const percent = Math.round((score / firstPassCount) * 100);
+  finalScoreEl.textContent = `${percent}%`;
+  let text = "";
+  if (percent >= 90) text = "Sehr stark. Die Basis sitzt. Das System musste dich nur wenig bestrafen.";
+  else if (percent >= 75) text = "Gute Leistung. Solide. Einzelne Details brauchen noch Wiederholung.";
+  else if (percent >= 60) text = "Ordentlich, aber noch nicht sattelfest. Gerade die Fehlerfragen solltest du wiederholen.";
+  else text = "Da ist noch Luft nach oben. Immerhin zeigt die App gnadenlos ehrlich, wo es hakt.";
+  resultTextEl.textContent = text;
+  resultA.textContent = `Im ersten Durchgang direkt richtig: ${score} von ${firstPassCount} Fragen.`;
+  resultB.textContent = `Zusätzliche Wiederholungen durch Fehler oder Zeitablauf: ${repeatedCount}.`;
+  resultC.textContent = "Falsch beantwortete Fragen wurden so lange erneut gestellt, bis sie richtig beantwortet wurden.";
+  showScreen(resultScreen);
+}
+startBtn.addEventListener("click", startQuiz);
+nextBtn.addEventListener("click", () => {
+  if (currentIndex < queue.length - 1) {
+    currentIndex += 1;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
 });
-
-document.getElementById("antworten").innerHTML = html;
-
-let t = 120;
-clearInterval(zeit);
-zeit = setInterval(()=>{
-t--;
-document.getElementById("timer").innerText = "Zeit: " + t;
-if(t<=0){
-falsch.push(f);
-index++;
-zeigeFrage();
-}
-},1000);
-}
-
-function check(i){
-clearInterval(zeit);
-if(i !== fragen[index].richtig){
-falsch.push(fragen[index]);
-}
-index++;
-zeigeFrage();
-}
+restartBtn.addEventListener("click", startQuiz);
+againBtn.addEventListener("click", startQuiz);
+backBtn.addEventListener("click", () => showScreen(startScreen));
+shuffleToggle.addEventListener("click", () => {
+  settings.shuffle = !settings.shuffle;
+  saveSettings();
+  updateStartUi();
+});
+saveBtn.addEventListener("click", () => {
+  try {
+    const parsed = JSON.parse(editor.value);
+    validateQuestions(parsed);
+    saveQuestions(parsed);
+    updateStartUi();
+    alert("Fragen gespeichert.");
+  } catch (e) {
+    alert("Fehler beim Speichern: " + e.message);
+  }
+});
+resetBtn.addEventListener("click", () => {
+  saveQuestions(defaultQuestions);
+  updateStartUi();
+  alert("Standardfragen wiederhergestellt.");
+});
+updateStartUi();
 </script>
-
 </body>
 </html>
