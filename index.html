@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Anästhesie & Schockraum</title>
 <style>
 body {
@@ -11,22 +11,39 @@ body {
   color: #fff;
   text-align: center;
   padding: 20px;
+  margin: 0;
+}
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
 }
 h1 {
   margin-bottom: 8px;
+  font-size: 40px;
 }
-p {
-  line-height: 1.4;
+.sub {
+  margin-bottom: 10px;
+  color: #ddd;
+}
+.meta {
+  margin: 18px 0;
+  font-size: 18px;
+  color: #ddd;
+}
+#frage {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 24px 0;
+  line-height: 1.35;
 }
 button {
   padding: 15px;
   margin: 10px auto;
-  width: 90%;
-  max-width: 1100px;
+  width: 100%;
   font-size: 18px;
   display: block;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 .answer-btn {
@@ -42,18 +59,19 @@ button {
   color: #fff;
 }
 .answer-btn.disabled {
-  opacity: 0.9;
+  opacity: 0.95;
   cursor: default;
 }
 #feedback {
   margin-top: 20px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 #explanation {
   margin-top: 10px;
-  font-size: 17px;
+  font-size: 18px;
   color: #ddd;
+  line-height: 1.5;
 }
 #nextBtn {
   background: #2563eb;
@@ -72,26 +90,34 @@ button {
   margin-top: 30px;
   font-size: 22px;
 }
+.small {
+  color: #bbb;
+  font-size: 16px;
+  margin-top: 12px;
+}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <h1>Anästhesie & Schockraum</h1>
+  <div class="sub">Exkurs: internistischer Schockraum</div>
 
-<h1>Anästhesie & Schockraum</h1>
-<p>Exkurs: internistischer Schockraum</p>
+  <div id="quizBox">
+    <div class="meta" id="progress"></div>
+    <div id="frage"></div>
+    <div id="antworten"></div>
+    <div id="feedback"></div>
+    <div id="explanation"></div>
+    <button id="nextBtn" class="hidden" onclick="nextQuestion()">Nächste Frage</button>
+    <div id="timer"></div>
+    <div class="small">Falsch beantwortete oder abgelaufene Fragen kommen später erneut.</div>
+  </div>
 
-<div id="quizBox">
-  <p id="frage" style="font-size:24px;font-weight:bold;"></p>
-  <div id="antworten"></div>
-  <div id="feedback"></div>
-  <div id="explanation"></div>
-  <button id="nextBtn" class="hidden" onclick="nextQuestion()">Nächste Frage</button>
-  <div id="timer"></div>
+  <div id="result" class="hidden"></div>
 </div>
 
-<div id="result" class="hidden"></div>
-
 <script>
-let fragen = [
+const fragen = [
   {
     frage: "Welche Maßnahme sollte bei RSI vermieden werden?",
     antworten: ["Präoxygenierung", "Zwischenbeatmung", "Teamkommunikation", "Laryngoskopie"],
@@ -109,6 +135,396 @@ let fragen = [
     antworten: ["Auskühlen lassen", "Wärmeerhalt", "Volumen ohne Kontrolle", "Selen hochdosiert"],
     richtig: 1,
     erklaerung: "Wärmeerhalt ist wichtig, weil Hypothermie die Gerinnung verschlechtert."
+  },
+  {
+    frage: "Welche Kombination beschreibt die Grundziele einer Allgemeinanästhesie am besten?",
+    antworten: ["Analgesie, Hypnose, Muskelrelaxierung und Schutz vor Reizen", "Antibiose, Sedierung, Diurese und Normothermie", "Volumentherapie, NIV, Analgesie und Monitoring", "Intubation, Beatmung, Mobilisation und Extubation"],
+    richtig: 0,
+    erklaerung: "Das sind die klassischen Kernziele der Allgemeinanästhesie."
+  },
+  {
+    frage: "Welches Opioid ist ein typisches Medikament zur Narkoseeinleitung?",
+    antworten: ["Ibuprofen", "Fentanyl", "Paracetamol", "Diclofenac"],
+    richtig: 1,
+    erklaerung: "Fentanyl ist ein klassisches stark wirksames Opioid."
+  },
+  {
+    frage: "Welche Fentanyl-Dosierung passt typischerweise zur Narkoseeinleitung?",
+    antworten: ["0,05 µg pro kgKG", "2 bis 4 µg pro kgKG", "20 bis 40 µg pro kgKG", "2 bis 4 mg pro kgKG"],
+    richtig: 1,
+    erklaerung: "Für Fentanyl sind 2 bis 4 µg pro kgKG ein typischer Bereich."
+  },
+  {
+    frage: "Welche Sufentanil-Dosierung passt typischerweise zur Narkoseeinleitung?",
+    antworten: ["0,2 bis 0,5 µg pro kgKG", "2 bis 4 mg pro kgKG", "5 bis 10 µg pro kgKG oral", "15 bis 40 mg pro kgKG"],
+    richtig: 0,
+    erklaerung: "Sufentanil wird in deutlich kleineren Dosen gegeben."
+  },
+  {
+    frage: "Welches Hypnotikum wird typischerweise mit 1,5 bis 2,5 mg pro kgKG dosiert?",
+    antworten: ["Etomidat", "Thiopental", "Propofol", "Midazolam"],
+    richtig: 2,
+    erklaerung: "Propofol wird häufig in diesem Dosisbereich verwendet."
+  },
+  {
+    frage: "Welches Hypnotikum wird typischerweise mit 2,5 bis 5 mg pro kgKG dosiert?",
+    antworten: ["Thiopental", "Ketanest", "Propofol", "Fentanyl"],
+    richtig: 0,
+    erklaerung: "Thiopental liegt typischerweise in diesem Bereich."
+  },
+  {
+    frage: "Welche Aussage zu Propofol ist korrekt?",
+    antworten: ["1 Prozent Propofol entspricht 1 mg pro ml", "1 Prozent Propofol entspricht 10 mg pro ml", "2 Prozent Propofol entspricht 2 mg pro ml", "Propofol gehört zu den Opioiden"],
+    richtig: 1,
+    erklaerung: "1 Prozent entspricht 10 mg pro ml, 2 Prozent entspricht 20 mg pro ml."
+  },
+  {
+    frage: "Welches Muskelrelaxans wird üblicherweise mit 0,5 bis 1 mg pro kgKG dosiert?",
+    antworten: ["Succinylcholin", "Rocuronium", "Atracurium", "Pancuronium"],
+    richtig: 1,
+    erklaerung: "Rocuronium ist ein häufig genutztes nicht depolarisierendes Relaxans."
+  },
+  {
+    frage: "Welches Muskelrelaxans wird üblicherweise mit 1 bis 1,5 mg pro kgKG dosiert?",
+    antworten: ["Rocuronium", "Succinylcholin", "Mivacurium", "Atracurium"],
+    richtig: 1,
+    erklaerung: "Succinylcholin wird klassisch in diesem Bereich dosiert."
+  },
+  {
+    frage: "Wie wirkt Succinylcholin?",
+    antworten: ["Als kompetitiver Antagonist", "Über Dauerdepolarisierung an der motorischen Endplatte", "Über GABA-Rezeptoren", "Als Opioidagonist"],
+    richtig: 1,
+    erklaerung: "Succinylcholin führt zu einer Dauerdepolarisierung und danach zur Relaxation."
+  },
+  {
+    frage: "Welche Besonderheit hat Rocuronium im Notfallmanagement?",
+    antworten: ["Es kann mit Sugammadex antagonisiert werden", "Es wirkt nur intramuskulär", "Es führt regelhaft zu Hyperkaliämie", "Es ist ein Hypnotikum"],
+    richtig: 0,
+    erklaerung: "Rocuronium kann mit Sugammadex aufgehoben werden."
+  },
+  {
+    frage: "Was gehört zum obligaten Basismonitoring bei der Narkose?",
+    antworten: ["Pulsoxymetrie, 3-Kanal-EKG und automatische Blutdruckmessung", "Nur Kapnographie", "Nur arterielle Blutdruckmessung", "Nur BIS"],
+    richtig: 0,
+    erklaerung: "Diese drei Komponenten sind die Basis."
+  },
+  {
+    frage: "Welche zusätzliche Überwachung ist bei beatmeten Patienten besonders wichtig?",
+    antworten: ["Kapnometrie oder Kapnographie", "Otoskopie", "Langzeit-EKG", "Peak Flow"],
+    richtig: 0,
+    erklaerung: "Kapnographie ist zentral zur Kontrolle von Beatmung und Tubuslage."
+  },
+  {
+    frage: "Was gehört zur guten Vorbereitung einer Notfallnarkose?",
+    antworten: ["Präoxygenierung, vollständiges Equipment, funktionierende Absaugung und Plan B", "Nur eine Kanüle und Propofol", "Nur Laryngoskop und Stethoskop", "Nur ein Opioid"],
+    richtig: 0,
+    erklaerung: "Vorbereitung schlägt hektische Improvisation."
+  },
+  {
+    frage: "Welcher systolische Blutdruckabfall wird bei Narkoseeinleitung als maximal tolerabel angesehen?",
+    antworten: ["10 Prozent", "20 Prozent", "30 Prozent", "40 Prozent"],
+    richtig: 1,
+    erklaerung: "Mehr als 20 Prozent Abfall vom Ausgangswert sollte man nicht einfach hinnehmen."
+  },
+  {
+    frage: "Welcher MAP-Wert sollte keinesfalls toleriert werden?",
+    antworten: ["Unter 80 mmHg", "Unter 75 mmHg", "Unter 65 mmHg", "Unter 55 mmHg"],
+    richtig: 2,
+    erklaerung: "Ein MAP unter 65 mmHg ist kritisch."
+  },
+  {
+    frage: "Welche einfache Basismaßnahme kann bei Blutdruckabfall nach Einleitung helfen?",
+    antworten: ["Trendelenburg-Lagerung", "Bauchlage", "PEEP stark erhöhen", "Sofort extubieren"],
+    richtig: 0,
+    erklaerung: "Lagerung kann kurzfristig helfen."
+  },
+  {
+    frage: "Welche Medikamentengruppe wird bei hämodynamischer Instabilität häufig benötigt?",
+    antworten: ["Antibiotika", "Vasopressoren", "Antiemetika", "Antihistaminika"],
+    richtig: 1,
+    erklaerung: "Bei vasoplegischer oder kreislaufrelevanter Instabilität braucht es oft Vasopressoren."
+  },
+  {
+    frage: "Welches Medikament wird im klinischen Alltag häufig als Bolusmittel bei Blutdruckabfall genutzt?",
+    antworten: ["Akrinor", "Salbutamol", "Heparin", "Insulin"],
+    richtig: 0,
+    erklaerung: "Akrinor wird häufig als pragmatische Bolustherapie verwendet."
+  },
+  {
+    frage: "Welche Noradrenalin-Verdünnung ist als pragmatischer Notfallansatz gebräuchlich?",
+    antworten: ["1 mg auf 100 ml NaCl", "10 mg auf 1 ml pur", "1 mg auf 1 Liter Glukose", "25 mg als Bolus"],
+    richtig: 0,
+    erklaerung: "Eine gebräuchliche Verdünnung ist 1 mg Noradrenalin in 100 ml NaCl."
+  },
+  {
+    frage: "Welche Reihenfolge beschreibt einen typischen Ablauf der Atemwegssicherung am besten?",
+    antworten: ["Präoxygenierung, Einleitung, gegebenenfalls Zwischenbeatmung, Intubation, stabile Narkose", "Intubation, Präoxygenierung, Opioidgabe, Überwachung", "Sedierung, Extubation, Larynxmaske, Präoxygenierung", "Nur Präoxygenierung und dann Transport"],
+    richtig: 0,
+    erklaerung: "Das ist der typische strukturierte Ablauf."
+  },
+  {
+    frage: "Welche Maßnahmen helfen initial, einen verlegten oberen Atemweg freizumachen?",
+    antworten: ["Inspektion, Fremdkörper entfernen, Absaugen und Esmarch-Handgriff", "Nur sofortige Thoraxdrainage", "Nur arterielle Punktion", "Nur CPAP"],
+    richtig: 0,
+    erklaerung: "Vor jedem größeren Eingriff stehen die Basics."
+  },
+  {
+    frage: "Was ist ein Guedel-Tubus?",
+    antworten: ["Ein sicherer Aspirationsschutz", "Ein Oropharyngealtubus aus festem Kunststoff", "Ein intratrachealer Tubus", "Ein Nasopharyngealtubus"],
+    richtig: 1,
+    erklaerung: "Der Guedel-Tubus hält vor allem die Zunge frei."
+  },
+  {
+    frage: "Wann ist ein Guedel-Tubus kontraindiziert?",
+    antworten: ["Bei Hypotonie", "Bei erhaltenen Abwehrreflexen", "Bei Tachykardie", "Bei Sauerstoffbedarf"],
+    richtig: 1,
+    erklaerung: "Erhaltene Schutzreflexe erhöhen das Risiko für Würgen und Erbrechen."
+  },
+  {
+    frage: "Was ist ein Wendl-Tubus?",
+    antworten: ["Ein Oropharyngealtubus", "Ein weicher Nasopharyngealtubus", "Ein endotrachealer Tubus", "Ein supraglottischer Tubus mit Cuff"],
+    richtig: 1,
+    erklaerung: "Der Wendl-Tubus verläuft nasal in den Nasopharynx."
+  },
+  {
+    frage: "Wann ist ein Wendl-Tubus problematisch oder kontraindiziert?",
+    antworten: ["Bei schwerer Gerinnungsstörung oder Schädelbasisverletzung", "Bei Fieber", "Bei Hypertonie", "Bei normaler Vigilanz"],
+    richtig: 0,
+    erklaerung: "Gerinnungsstörungen und relevante Verletzungen sind problematisch."
+  },
+  {
+    frage: "Welche Aussage zu Guedel- und Wendl-Tubus ist richtig?",
+    antworten: ["Sie sichern zuverlässig vor Aspiration", "Sie verhindern vor allem das Zurückfallen der Zunge, bieten aber keinen sicheren Aspirationsschutz", "Sie ersetzen die Intubation vollständig", "Sie dürfen nur im OP verwendet werden"],
+    richtig: 1,
+    erklaerung: "Sie sind Hilfsmittel, aber kein definitiver Schutz vor Aspiration."
+  },
+  {
+    frage: "Wie sind supraglottische Atemwegshilfen im Schockraum einzuordnen?",
+    antworten: ["Immer Mittel der ersten Wahl", "Nie erlaubt", "Nicht erste Wahl, aber wichtige Rückfallebene", "Nur für Kinder geeignet"],
+    richtig: 2,
+    erklaerung: "Supraglottische Hilfen sind besonders als Backup relevant."
+  },
+  {
+    frage: "Welche Haltung ist beim schwierigen Atemweg richtig?",
+    antworten: ["Möglichst viele Intubationsversuche ohne Unterbrechung", "Früh vorausplanen, Hilfe holen und Ressourcen mobilisieren", "Nur auf Glück hoffen", "Plan B erst nach zehn Minuten"],
+    richtig: 1,
+    erklaerung: "Zu spätes Umschalten ist oft der eigentliche Fehler."
+  },
+  {
+    frage: "Wann spricht man von cannot intubate, cannot oxygenate?",
+    antworten: ["Wenn der Patient hustet", "Wenn weder Intubation noch ausreichende Oxygenierung gelingt", "Wenn ein Guedel-Tubus nicht passt", "Wenn der erste Versuch schwierig war"],
+    richtig: 1,
+    erklaerung: "Dann braucht es rasch eine lebensrettende Eskalation."
+  },
+  {
+    frage: "Welchen Vorteil hat die volumenkontrollierte Beatmung?",
+    antworten: ["Garantiertes Inspirationsvolumen", "Niedrigste Beatmungsdrücke in jedem Fall", "Automatische Spontanatmung", "Kein Risiko für Volutrauma"],
+    richtig: 0,
+    erklaerung: "Das Volumen ist definiert, die Drücke können aber steigen."
+  },
+  {
+    frage: "Welche Beatmungsform gilt meist als lungenprotektiver?",
+    antworten: ["Volumenkontrollierte Beatmung", "Druckkontrollierte Beatmung", "Beutelbeatmung ohne Ventil", "Reine Sauerstoffbrille"],
+    richtig: 1,
+    erklaerung: "Druckkontrollierte Beatmung begrenzt die Spitzendrücke besser."
+  },
+  {
+    frage: "Welches Tidalvolumen wird für viele Erwachsene lungenprotektiv angestrebt?",
+    antworten: ["3 bis 5 ml pro kg Istgewicht", "6 bis 8 ml pro kg Idealgewicht", "10 bis 12 ml pro kg Körpergewicht", "15 ml pro kg Körpergewicht"],
+    richtig: 1,
+    erklaerung: "Entscheidend ist das Idealgewicht, nicht das aktuelle Körpergewicht."
+  },
+  {
+    frage: "Welcher PEEP-Bereich ist als Standardstartwert häufig sinnvoll?",
+    antworten: ["0 bis 2 mbar", "3 bis 4 mbar", "5 bis 8 mbar", "12 bis 15 mbar"],
+    richtig: 2,
+    erklaerung: "PEEP 5 bis 8 mbar ist ein typischer Startbereich."
+  },
+  {
+    frage: "Wann spricht man definitionsgemäß von einem Polytrauma nach Berliner Definition?",
+    antworten: ["Bei jeder einzelnen Fraktur", "Bei schweren Verletzungen in mindestens zwei Körperregionen plus mindestens einem Zusatzkriterium", "Nur bei Verkehrsunfällen", "Nur bei GCS 3"],
+    richtig: 1,
+    erklaerung: "Die Berliner Definition kombiniert Verletzungsmuster mit physiologischen Zusatzkriterien."
+  },
+  {
+    frage: "Welches Zusatzkriterium passt zur Berliner Polytrauma-Definition?",
+    antworten: ["SpO2 unter 99 Prozent", "RR systolisch 90 mmHg oder darunter", "Hb unter 14 g pro dl", "Temperatur 36,8 Grad"],
+    richtig: 1,
+    erklaerung: "Hypotonie ist eines der zentralen Zusatzkriterien."
+  },
+  {
+    frage: "Welcher neurologische Grenzwert ist ein Zusatzkriterium der Berliner Definition?",
+    antworten: ["GCS 14", "GCS 13", "GCS 10", "GCS 8 oder darunter"],
+    richtig: 3,
+    erklaerung: "Bewusstlosigkeit mit GCS 8 oder weniger gehört dazu."
+  },
+  {
+    frage: "Welche Altersgrenze ist als Zusatzkriterium in der Berliner Definition relevant?",
+    antworten: ["60 Jahre", "65 Jahre", "70 Jahre", "75 Jahre"],
+    richtig: 2,
+    erklaerung: "Alter 70 oder mehr ist eines der Zusatzkriterien."
+  },
+  {
+    frage: "Was gehört bereits vor Ankunft des Patienten zu einer guten Schockraumvorbereitung?",
+    antworten: ["Nur CT reservieren", "Eigenschutz, Ressourcenmanagement, Rollenklärung und individuelle Vorbereitung", "Nur Narkosemedikamente richten", "Nur Blutprodukte bestellen"],
+    richtig: 1,
+    erklaerung: "Der Schockraum beginnt nicht mit dem Eintreffen des Patienten, sondern vorher."
+  },
+  {
+    frage: "Welche Zeitspanne umfasst Phase Alpha im Schockraumkonzept?",
+    antworten: ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "30 bis 60 Minuten"],
+    richtig: 0,
+    erklaerung: "Phase Alpha ist die erste ultrakurze Stabilisationsphase."
+  },
+  {
+    frage: "Was ist das Ziel von Phase Alpha?",
+    antworten: ["Komplette OP-Freigabe", "Initiale Stabilisierung mit Basismonitoring und Basisdiagnostik", "Nur Dokumentation", "Nur Sonographie"],
+    richtig: 1,
+    erklaerung: "Hier geht es um das unmittelbare Sichern lebenswichtiger Funktionen."
+  },
+  {
+    frage: "Welche Zeitspanne umfasst Phase Bravo?",
+    antworten: ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "30 bis 90 Minuten"],
+    richtig: 1,
+    erklaerung: "Phase Bravo folgt direkt auf die initiale Stabilisierungsphase."
+  },
+  {
+    frage: "Was ist das Ziel von Phase Bravo?",
+    antworten: ["Komplette klinische Untersuchung, erweitertes Monitoring und spezifische Diagnostik", "Nur Blutabnahme", "Nur Reevaluation", "Nur Transportplanung"],
+    richtig: 0,
+    erklaerung: "Hier wird systematisch erweitert und präzisiert."
+  },
+  {
+    frage: "Welche Zeitspanne umfasst Phase Charlie?",
+    antworten: ["0 bis 3 Minuten", "3 bis 10 Minuten", "10 bis 30 Minuten", "45 bis 90 Minuten"],
+    richtig: 2,
+    erklaerung: "Phase Charlie dient der Vervollständigung und Entscheidungsfindung."
+  },
+  {
+    frage: "Was ist das Hauptziel von Phase Charlie?",
+    antworten: ["Abschluss notwendiger Diagnostik und interdisziplinäre Entscheidung über das weitere Vorgehen", "Nur Wärmeerhalt", "Nur CT ohne Rücksprache", "Nur Verlegung in den Aufwachraum"],
+    richtig: 0,
+    erklaerung: "Am Ende muss eine saubere therapeutische Entscheidung stehen."
+  },
+  {
+    frage: "Was muss im Schockraum regelmäßig und bei jeder Zustandsänderung erfolgen?",
+    antworten: ["Neue Intubation", "Reevaluation nach xABCDE", "Neue Blutgruppe", "Nur neue BGA"],
+    richtig: 1,
+    erklaerung: "Der Zustand ändert sich, also muss die Struktur wiederholt werden."
+  },
+  {
+    frage: "Wofür steht das x beziehungsweise c in xABCDE?",
+    antworten: ["Control bleeding oder C-spine control", "Cardiac cycle", "Computed tomography", "Critical care"],
+    richtig: 0,
+    erklaerung: "Je nach Schema steht x für Blutungskontrolle, c für HWS-Schutz."
+  },
+  {
+    frage: "Was gehört bei xABCDE zum Buchstaben A?",
+    antworten: ["Atemweg sichern unter Beachtung der HWS-Immobilisation", "Blutung stillen", "Neurologische Prüfung", "Entkleiden"],
+    richtig: 0,
+    erklaerung: "A steht für Airway."
+  },
+  {
+    frage: "Was gehört bei xABCDE zum B?",
+    antworten: ["O2-Gabe, Pleura entlasten und Beatmung sicherstellen", "Nur Pupillen prüfen", "Nur BGA", "Nur Druckverband"],
+    richtig: 0,
+    erklaerung: "B steht für Breathing und umfasst Oxygenierung und Ventilation."
+  },
+  {
+    frage: "Was gehört bei xABCDE zum C?",
+    antworten: ["Perikard entlasten, Blutung kontrollieren, Volumen und Katecholamine", "Nur EKG schreiben", "Nur Schmerztherapie", "Nur CT anfordern"],
+    richtig: 0,
+    erklaerung: "C steht für Circulation und umfasst die Behandlung des Kreislaufs."
+  },
+  {
+    frage: "Was gehört bei xABCDE zum D?",
+    antworten: ["Neurologische Beurteilung einschließlich Bildgebung und neurotraumatologischer Konsequenzen", "Nur Wärmeerhalt", "Nur Pulskontrolle", "Nur Bauchsonographie"],
+    richtig: 0,
+    erklaerung: "D steht für Disability."
+  },
+  {
+    frage: "Was gehört bei xABCDE zum E?",
+    antworten: ["Entkleiden, Log Roll und Schutz vor Wärmeverlust", "Nur EKG", "Nur Thoraxdrainage", "Nur arterielle Punktion"],
+    richtig: 0,
+    erklaerung: "Exposure darf nie ohne Wärmemanagement gedacht werden."
+  },
+  {
+    frage: "Wie sind Polytraumapatienten bezüglich Schmerztherapie oft versorgt?",
+    antworten: ["Eher überanalgetisiert", "Häufig analgetisch unterversorgt", "Immer perfekt versorgt", "Analgesie ist meist unnötig"],
+    richtig: 1,
+    erklaerung: "Schmerztherapie kommt im Chaos der Erstversorgung oft zu kurz."
+  },
+  {
+    frage: "Welches Spannungsfeld ist bei der Analgesie im Trauma besonders wichtig?",
+    antworten: ["Schmerzfreiheit versus neurologische Beurteilbarkeit", "Analgesie versus Pulsoxymetrie", "Analgesie versus Lagerung", "Analgesie versus EKG"],
+    richtig: 0,
+    erklaerung: "Zu viel Sedierung kann die klinische Beurteilung erschweren."
+  },
+  {
+    frage: "Welche Strategie ist bei wachem, spontan atmendem Traumapatienten sinnvoll?",
+    antworten: ["Titrierte Gabe kleiner Dosen geeigneter Analgetika", "Sofort tiefe Vollnarkose", "Nur Zureden", "Schmerz ignorieren"],
+    richtig: 0,
+    erklaerung: "Titrierte Analgesie unter Erhalt der Spontanatmung ist oft sinnvoll."
+  },
+  {
+    frage: "Welche Beispielgabe passt zu Fentanyl in kleinen Analgesieschritten?",
+    antworten: ["0,05 mg i.v.", "5 mg i.v.", "50 mg i.v.", "0,5 g i.v."],
+    richtig: 0,
+    erklaerung: "0,05 mg entsprechen 50 µg und sind als titrierter Schritt plausibel."
+  },
+  {
+    frage: "Welche kleine titrierte Dosis Morphin ist als Beispiel plausibel?",
+    antworten: ["1 mg i.v.", "10 mg i.v.", "30 mg i.v.", "100 mg i.v."],
+    richtig: 0,
+    erklaerung: "Gerade bei instabilen Patienten ist titriertes Vorgehen sinnvoll."
+  },
+  {
+    frage: "Welche Aussage zu Esketamin beziehungsweise Ketanest ist richtig?",
+    antworten: ["Niedrige Dosis analgesiert, mittlere Dosis sediert, hohe Dosis kann zur Anästhesie beitragen", "Es ist nur ein Antiemetikum", "Es darf beim Trauma nie gegeben werden", "Es ist nur oral einsetzbar"],
+    richtig: 0,
+    erklaerung: "Esketamin ist dosisabhängig vielseitig einsetzbar."
+  },
+  {
+    frage: "Was sollte neben Opiaten bei Schmerztherapie zusätzlich mitgedacht werden?",
+    antworten: ["Koanalgetika, unterstützende Maßnahmen und psychologische Begleitung", "Nur Fixierung", "Nur Sauerstoff", "Nur Katecholamine"],
+    richtig: 0,
+    erklaerung: "Schmerz ist nicht nur Pharmakologie."
+  },
+  {
+    frage: "Welche Aussage zur Hypothermie und Gerinnung ist richtig?",
+    antworten: ["Hypothermie verbessert die Gerinnung", "Pro Grad Temperaturverlust kann die Gerinnungsaktivität deutlich sinken", "Temperatur spielt für die Gerinnung keine Rolle", "Unter 35 Grad gerinnt Blut besser"],
+    richtig: 1,
+    erklaerung: "Hypothermie verschlechtert die Gerinnung relevant."
+  },
+  {
+    frage: "Welche High-Flow-Einstellungen sind grundsätzlich typisch?",
+    antworten: ["FiO2 0,21 bis 1,0 und Flow 20 bis 60 l pro Minute", "Nur 2 l pro Minute", "Nur FiO2 1,0 ohne Flowanpassung", "Nur Flow 5 l pro Minute"],
+    richtig: 0,
+    erklaerung: "High Flow lebt von hohem Flow und variabler FiO2."
+  },
+  {
+    frage: "Welcher Vorteil von High Flow ist korrekt?",
+    antworten: ["Sicherer Aspirationsschutz", "Totraumspülung", "Automatische Intubationsvermeidung", "Keine Überwachung nötig"],
+    richtig: 1,
+    erklaerung: "High Flow kann den nasopharyngealen Totraum spülen."
+  },
+  {
+    frage: "Welcher Vorteil der NIV ist korrekt?",
+    antworten: ["Nahezu 100 Prozent Sauerstoff sind möglich", "Sie braucht nie Monitoring", "Aspiration ist ausgeschlossen", "Sie ist immer angenehmer als High Flow"],
+    richtig: 0,
+    erklaerung: "NIV kann hohe FiO2 und Druckunterstützung liefern."
+  },
+  {
+    frage: "Welche weitere Wirkung der NIV ist klinisch wichtig?",
+    antworten: ["Reduktion der Atemarbeit", "Automatische Analgesie", "Senkung des Blutzuckers", "Sichere Aspirationsvermeidung"],
+    richtig: 0,
+    erklaerung: "NIV kann die Atemarbeit deutlich entlasten."
+  },
+  {
+    frage: "Welche Aussage zur NIV ist richtig?",
+    antworten: ["NIV ist nicht gleich NIV", "NIV bedeutet immer CPAP", "NIV ersetzt jede Intubation", "NIV darf im Schockraum nie eingesetzt werden"],
+    richtig: 0,
+    erklaerung: "CPAP, Druckunterstützung und Bilevel sind eben nicht dasselbe."
   }
 ];
 
@@ -119,6 +535,13 @@ let punktzahl = 0;
 let timer;
 let zeit = 120;
 let beantwortet = false;
+let gesamtGestellt = 0;
+
+function updateProgress() {
+  document.getElementById("progress").innerText =
+    "Direkt richtig: " + punktzahl + " von " + fragen.length +
+    " | Aktuelle Runde: Frage " + (index + 1) + " von " + aktuelleFragen.length;
+}
 
 function zeigeFrage() {
   if (index >= aktuelleFragen.length) {
@@ -136,19 +559,20 @@ function zeigeFrage() {
   beantwortet = false;
   zeit = 120;
   clearInterval(timer);
+  gesamtGestellt++;
 
   document.getElementById("feedback").innerText = "";
   document.getElementById("explanation").innerText = "";
   document.getElementById("nextBtn").classList.add("hidden");
 
-  let frageObj = aktuelleFragen[index];
+  const frageObj = aktuelleFragen[index];
   document.getElementById("frage").innerText = frageObj.frage;
 
-  let antwortenBox = document.getElementById("antworten");
+  const antwortenBox = document.getElementById("antworten");
   antwortenBox.innerHTML = "";
 
   frageObj.antworten.forEach((antwort, i) => {
-    let btn = document.createElement("button");
+    const btn = document.createElement("button");
     btn.innerText = antwort;
     btn.className = "answer-btn";
     btn.onclick = () => pruefeAntwort(i);
@@ -156,6 +580,7 @@ function zeigeFrage() {
   });
 
   document.getElementById("timer").innerText = "Zeit: 120";
+  updateProgress();
 
   timer = setInterval(() => {
     zeit--;
@@ -172,14 +597,12 @@ function pruefeAntwort(auswahl) {
   beantwortet = true;
   clearInterval(timer);
 
-  let frageObj = aktuelleFragen[index];
-  let buttons = document.querySelectorAll(".answer-btn");
+  const frageObj = aktuelleFragen[index];
+  const buttons = document.querySelectorAll(".answer-btn");
 
   buttons.forEach((btn, i) => {
     btn.classList.add("disabled");
-    if (i === frageObj.richtig) {
-      btn.classList.add("correct");
-    }
+    if (i === frageObj.richtig) btn.classList.add("correct");
   });
 
   if (auswahl === frageObj.richtig) {
@@ -195,6 +618,7 @@ function pruefeAntwort(auswahl) {
     "Richtige Antwort: " + frageObj.antworten[frageObj.richtig] +
     ". " + (frageObj.erklaerung || "");
 
+  updateProgress();
   document.getElementById("nextBtn").classList.remove("hidden");
 }
 
@@ -202,14 +626,12 @@ function zeitAbgelaufen() {
   if (beantwortet) return;
   beantwortet = true;
 
-  let frageObj = aktuelleFragen[index];
-  let buttons = document.querySelectorAll(".answer-btn");
+  const frageObj = aktuelleFragen[index];
+  const buttons = document.querySelectorAll(".answer-btn");
 
   buttons.forEach((btn, i) => {
     btn.classList.add("disabled");
-    if (i === frageObj.richtig) {
-      btn.classList.add("correct");
-    }
+    if (i === frageObj.richtig) btn.classList.add("correct");
   });
 
   document.getElementById("feedback").innerText = "Zeit abgelaufen";
@@ -218,6 +640,7 @@ function zeitAbgelaufen() {
     ". " + (frageObj.erklaerung || "");
 
   falschBeantwortet.push(frageObj);
+  updateProgress();
   document.getElementById("nextBtn").classList.remove("hidden");
 }
 
@@ -228,16 +651,19 @@ function nextQuestion() {
 
 function quizBeenden() {
   document.getElementById("quizBox").classList.add("hidden");
-  let result = document.getElementById("result");
+  const result = document.getElementById("result");
   result.classList.remove("hidden");
+  const prozent = Math.round((punktzahl / fragen.length) * 100);
+
   result.innerHTML =
     "<h2>Quiz beendet</h2>" +
     "<p>Direkt richtig beantwortet: " + punktzahl + " von " + fragen.length + "</p>" +
+    "<p>Ergebnis im ersten Durchgang: " + prozent + " Prozent</p>" +
+    "<p>Insgesamt gestellte Fragen inklusive Wiederholungen: " + gesamtGestellt + "</p>" +
     "<p>Alle falsch beantworteten Fragen wurden wiederholt, bis sie richtig beantwortet waren.</p>";
 }
 
 zeigeFrage();
 </script>
-
 </body>
 </html>
